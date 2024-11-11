@@ -5,8 +5,8 @@
 #include <MD5Builder.h>
 
 // Configurazione WiFi
-const char* ssid = "*";
-const char* password = "*";
+const char* ssid = "";
+const char* password = "";
 
 // Configurazione Server
 const char* serverUrl = "http://130.136.3.214:3000/check-rfid";
@@ -90,7 +90,6 @@ void setLEDColor(bool red, bool green, bool blue) {
 void handleLEDBlink() {
   if (isBlinking ) {
     if (ledBlinkingCounter < 3) {
-      Serial.println("if: "+ledBlinkingCounter);
       blinkState = !blinkState;
       setLEDColor(blinkState, false, false);
       ledBlinkingCounter++;
@@ -104,15 +103,15 @@ void handleLEDBlink() {
 }
 
 void handlePresenceTimeout() {
-  if (userAuthorized) {
     unsigned long currentTime = millis();
     if (currentTime - presenceStartTime >= PRESENCE_TIMEOUT) {
+      userAuthorized=false;
       // Timeout scaduto, disattiva presenza
       digitalWrite(PRESENCE_RELAY_PIN, LOW);
       setLEDColor(true, false, false); // Rosso fisso
       Serial.println("Timeout presenza scaduto");
     }
-  }
+  
 }
 
 bool checkTagWithServer(String tag) {
@@ -166,21 +165,20 @@ void handleRFIDRead() {
       tagID = "";
     }
     else if (c == 0x03) {
+      unsigned long currentTime = millis();
+      presenceStartTime = currentTime; // Resetta il timer di presenza
       isReading = false;
       if (tagID.length() == TAG_LENGTH) {
-        unsigned long currentTime = millis();
+        Serial.print("Tag letto: ");
+        Serial.println(tagID);
         String tagHash= hashTag(tagID);
-        
         if (currentTime - lastReadTime >= COOLDOWN_PERIOD) {
-          Serial.print("Tag letto: ");
-          Serial.println(tagID);
-          
           if (checkTagWithServer(tagID)) {
             Serial.println("Utente autorizzato");
             userAuthorized = true;
             currentAuthorizedTag = tagHash;
             lastReadTime = currentTime;
-            presenceStartTime = currentTime; // Resetta il timer di presenza
+            
             
             // Attiva relè presenza e LED verde
             digitalWrite(PRESENCE_RELAY_PIN, HIGH);
@@ -207,6 +205,8 @@ void handleRFIDRead() {
 }
 
 void incrementCoffeeCount() {
+  unsigned long currentTime = millis();
+
   if (!currentAuthorizedTag.isEmpty()) {
     HTTPClient http;
     
@@ -222,6 +222,7 @@ void incrementCoffeeCount() {
       currentCoffeeCount = doc["coffeeCount"];
       Serial.print("Caffè totali per questo utente: ");
       Serial.println(currentCoffeeCount);
+      presenceStartTime = currentTime; // Resetta il timer di presenza
     } else {
       Serial.print("Errore incremento caffè: ");
       Serial.println(httpResponseCode);
@@ -250,7 +251,6 @@ void handleSwitch() {
       }
     } else {  // Switch OFF
       Serial.println("Switch OFF - Disattivazione caffè");
-      Serial.println("Autorizzazione rimossa");
       digitalWrite(COFFEE_RELAY_PIN, LOW);
       setLEDColor(true, false, false);
       userAuthorized=false;
