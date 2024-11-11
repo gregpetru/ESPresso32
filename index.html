@@ -1,50 +1,73 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Tag RFID</title>
+    <title>ESPresso32</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Link a Font Awesome -->
+    <link rel="icon" type="image/png" href="coffee.png"> 
     <script>
-        // Funzione per controllare se l'utente è autenticato
         async function checkAuth() {
             try {
                 const response = await fetch('/api/check-auth', {
                     method: 'GET',
-                    credentials: 'same-origin' // Assicurati che i cookie di sessione siano inclusi nelle richieste
+                    credentials: 'same-origin'
                 });
     
                 if (!response.ok) {
-                    window.location.href = '/login.html'; // Se non autenticato, reindirizza alla pagina di login
+                    window.location.href = '/login.html';
                 }
             } catch (error) {
                 console.error('Errore nel controllo autenticazione:', error);
-                window.location.href = '/login.html'; // Reindirizza anche in caso di errore
+                window.location.href = '/login.html';
             }
         }
     
-        // Esegui il controllo all'avvio della pagina
         checkAuth();
     </script>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Gestione Tag RFID</h1>
-        
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <header class="bg-indigo-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-extrabold tracking-wide flex items-center justify-center">
+                <i class="fas fa-coffee mr-3"></i> <!-- Icona del caffè -->
+                ESPresso32
+            </h1>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
         <!-- Form aggiunta tag -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
             <h2 class="text-xl font-semibold mb-4">Aggiungi Nuovo Tag</h2>
             <form id="addTagForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Tag ID</label>
-                    <input type="text" id="tagId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <input type="text" id="tagId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Descrizione</label>
-                    <input type="text" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-gray-700">Nome e Cognome</label>
+                    <input type="text" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aggiungi Tag</button>
+                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Aggiungi Tag</button>
+                <button id="syncTagButton" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Sync Tag</button>
+                <button id="resetCoffeCount" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" onclick="resetCoffe()">Azzera conteggio caffè</button>
+                <label id="timestampLabel" class="ml-4 text-gray-500">Ultimo aggiornamento: Mai</label>
             </form>
+        </div>
+
+        <div id="syncTagOverlay" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+            <div class="bg-white p-8 rounded-lg shadow-md relative">
+                <button id="closeOverlayButton" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                    ✕
+                </button>
+                <h2 class="text-xl font-semibold mb-4">Attendere un nuovo tag...</h2>
+                <div class="flex justify-center">
+                    <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Lista tag -->
@@ -55,7 +78,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tag ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome e Cognome</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Caffè Presi</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ultimo Utilizzo</th>
@@ -68,22 +91,34 @@
                 </table>
             </div>
         </div>
-    </div>
+    </main>
+
+    <tbody id="tagsList" class="bg-white divide-y divide-gray-200">
+        <!-- I tag verranno inseriti qui dinamicamente -->
+    </tbody>
 
     <script>
-        // Carica i tag
         async function loadTags() {
             try {
                 const response = await fetch('/api/tags');
-                const tags = await response.json();
+                const data = await response.json();
+                const tags = data.tag;  // I tag sono contenuti in `data.tags`
+                const timestamp = data.timestamp;  // Il timestamp è nel campo `timestamp`
+        
+                // Aggiorna il label con il timestamp
+                const timestampLabel = document.getElementById('timestampLabel');
+                if (timestampLabel) {
+                    timestampLabel.textContent = `Ultimo aggiornamento: ${new Date(timestamp).toLocaleDateString()}`;
+                }
+
                 const tbody = document.getElementById('tagsList');
                 tbody.innerHTML = '';
                 
                 tags.forEach(tag => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${tag.tag_id}</td>
-                        <td class="px-6 py-4">${tag.description || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span id="tagId-${tag.id}">${tag.tag_id}</span></td>
+                        <td class="px-6 py-4"><span id="description-${tag.id}">${tag.description || '-'}</span></td>
                         <td class="px-6 py-4">
                             <label class="inline-flex items-center">
                                 <input type="checkbox" class="form-checkbox" ${tag.authorized ? 'checked' : ''}
@@ -91,10 +126,11 @@
                                 <span class="ml-2">${tag.authorized ? 'Autorizzato' : 'Non autorizzato'}</span>
                             </label>
                         </td>
-                        <td class="px-6 py-4">${tag.coffee_count}</td>  <!-- New column -->
+                        <td class="px-6 py-4"><span id="coffeeCount-${tag.id}">${tag.coffee_count}</span></td>
                         <td class="px-6 py-4">${tag.last_used ? new Date(tag.last_used).toLocaleString() : 'Mai utilizzato'}</td>
                         <td class="px-6 py-4">
-                            <button onclick="deleteTag(${tag.id})" class="text-red-600 hover:text-red-900">Elimina</button>
+                            <button onclick="editTag(${tag.id})" class="text-blue-600 hover:text-blue-900">Modifica</button>
+                            <button onclick="deleteTag(${tag.id})" class="text-red-600 hover:text-red-900 ml-2">Elimina</button>
                         </td>
                     `;
                     tbody.appendChild(row);
@@ -104,21 +140,78 @@
             }
         }
 
-        // Aggiungi tag
+        function editTag(tagId) {
+            // Trasforma la riga in input modificabili
+            const tagIdSpan = document.getElementById(`tagId-${tagId}`);
+            const descriptionSpan = document.getElementById(`description-${tagId}`);
+            const coffeeCountSpan = document.getElementById(`coffeeCount-${tagId}`);
+            
+            tagIdSpan.innerHTML = `<input type="text" id="editTagId-${tagId}" value="${tagIdSpan.innerText}" class="border p-1 rounded">`;
+            descriptionSpan.innerHTML = `<input type="text" id="editDescription-${tagId}" value="${descriptionSpan.innerText}" class="border p-1 rounded">`;
+            coffeeCountSpan.innerHTML = `<input type="number" id="editCoffeeCount-${tagId}" value="${coffeeCountSpan.innerText}" class="border p-1 rounded">`;
+    
+            // Aggiungi pulsante per salvare le modifiche
+            const actionsCell = tagIdSpan.parentElement.parentElement.querySelector('td:last-child');
+            actionsCell.innerHTML = `
+                <button onclick="saveTag(${tagId})" class="text-green-600 hover:text-green-900">Salva</button>
+                <button onclick="loadTags()" class="text-gray-600 hover:text-gray-900 ml-2">Annulla</button>
+            `;
+        }
+        async function saveTag(tagId) {
+            // Ottieni i valori modificati
+            const newTagId = document.getElementById(`editTagId-${tagId}`).value;
+            const newDescription = document.getElementById(`editDescription-${tagId}`).value;
+            const newCoffeeCount = parseInt(document.getElementById(`editCoffeeCount-${tagId}`).value, 10);
+    
+            try {
+                const response = await fetch(`/api/tags/update`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tag_id: newTagId, description: newDescription, coffee_count: newCoffeeCount }),
+                });
+    
+                if (response.ok) {
+                    loadTags();
+                } else {
+                    throw new Error('Errore nel salvataggio del tag');
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore nel salvataggio del tag');
+            }
+        }
+        async function resetCoffe() {
+            try {
+                const response = await fetch(`/api/tags/reset`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timestamp: Date.now()}),
+                });
+    
+                if (response.ok) {
+                    loadTags();
+                } else {
+                    throw new Error('Errore nel reset del conteggio dei caffè');
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore nel salvataggio del timestamp');
+            }
+        }
+
         document.getElementById('addTagForm').onsubmit = async (e) => {
             e.preventDefault();
             const tagId = document.getElementById('tagId').value;
             const description = document.getElementById('description').value;
-
+        
             try {
                 const response = await fetch('/api/tags', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ tag_id: tagId, description }),
                 });
-
+        
                 if (response.ok) {
                     document.getElementById('tagId').value = '';
                     document.getElementById('description').value = '';
@@ -128,18 +221,16 @@
                     alert(error.error);
                 }
             } catch (error) {
-                console.error('Errore nell\'aggiunta del tag:', error);
+                console.error('Error adding the tag:', error);
+                alert('Error adding the tag');
             }
         };
 
-        // Aggiorna autorizzazione
         async function updateAuthorization(id, authorized) {
             try {
                 const response = await fetch(`/api/tags/${id}/authorize`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ authorized }),
                 });
 
@@ -154,15 +245,11 @@
             }
         }
 
-        // Elimina tag
         async function deleteTag(id) {
             if (!confirm('Sei sicuro di voler eliminare questo tag?')) return;
 
             try {
-                const response = await fetch(`/api/tags/${id}`, {
-                    method: 'DELETE',
-                });
-
+                const response = await fetch(`/api/tags/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     loadTags();
                 } else {
@@ -174,8 +261,64 @@
             }
         }
 
-        // Carica i tag all'avvio
         loadTags();
+        
+        
+
+        function syncTag() {
+            const syncTagOverlay = document.getElementById('syncTagOverlay');
+            syncTagOverlay.classList.remove('hidden');
+        
+            let pollingInterval; // Dichiarato qui per essere accessibile da timeout e pulsante "X"
+            
+            // Timeout di 30 secondi per interrompere la funzione
+            const timeout = setTimeout(() => {
+                clearInterval(pollingInterval);
+                syncTagOverlay.classList.add('hidden');
+                alert('Tempo scaduto per la sincronizzazione del tag.');
+            }, 30000);
+        
+            fetch('/api/tags/synctrue?sync=true', { credentials: 'same-origin' })
+                .then(response => response.json())
+                .then(data => {
+                    pollingInterval = setInterval(async () => {
+                        try {
+                            const response = await fetch('/api/tags/checksync', { credentials: 'same-origin' });
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.tagId) {
+                                    document.getElementById('tagId').value = data.tagId;
+                                    clearInterval(pollingInterval);
+                                    clearTimeout(timeout); // Cancella il timeout se il tag è letto correttamente
+                                    syncTagOverlay.classList.add('hidden');
+                                    alert('Tag Letto con successo!');
+                                }
+                            } else {
+                                clearInterval(pollingInterval);
+                                clearTimeout(timeout); // Cancella il timeout se si verifica un errore nella risposta
+                                syncTagOverlay.classList.add('hidden');
+                            }
+                        } catch (error) {
+                            console.error('Polling error:', error);
+                            clearInterval(pollingInterval);
+                            clearTimeout(timeout); // Cancella il timeout in caso di errore
+                            syncTagOverlay.classList.add('hidden');
+                        }
+                    }, 2000);
+                });
+        
+            // Pulsante "X" per interrompere manualmente la funzione
+            document.getElementById('closeOverlayButton').onclick = () => {
+                clearInterval(pollingInterval);
+                clearTimeout(timeout); // Cancella il timeout se chiuso manualmente
+                syncTagOverlay.classList.add('hidden');
+            };
+        }
+        
+        document.getElementById('syncTagButton').onclick = (e) => {
+            e.preventDefault();
+            syncTag();
+        };
     </script>
 </body>
 </html>

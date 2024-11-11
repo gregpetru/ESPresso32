@@ -7,6 +7,9 @@ const fs = require('fs');
 const session = require('express-session');
 
 const path = require('path');
+var eventsync = false;
+var pendingTagId = null;
+
 
 const app = express();
 const port = 3000;
@@ -57,10 +60,47 @@ function generateMD5(text) {
 }
 
 
+const pathReset = './timestamp.json';  // Definisci il percorso del file
+
+// Funzione per ottenere il timestamp salvato
+const getTimestamp = () => {
+    try {
+        const data = fs.readFileSync(pathReset, 'utf8');
+        const jsonData = JSON.parse(data);
+        return jsonData.timestamp;
+    } catch (err) {
+        console.error('Errore nella lettura del file:', err);
+        return null;
+    }
+};
+
+// Funzione per salvare il timestamp
+const saveTimestamp = (timestamp) => {
+    const data = { timestamp };
+    try {
+        fs.writeFileSync(pathReset, JSON.stringify(data), 'utf8');
+    } catch (err) {
+        console.error('Errore nella scrittura del file:', err);
+    }
+};
+
+
 const bcrypt = require('bcrypt');
+const { log } = require('console');
 
 function allowOnlyFromEsp32(req, res, next) {
     const esp32Ip = '130.136.3.252'; // Replace with the actual IP of your ESP32
+    const clientIp = req.ip.replace('::ffff:', ''); // Remove IPv6 prefix if present
+    if (clientIp === esp32Ip) {
+        next();
+    } else {
+        logEvent('Accesso non autorizzato tentato da IP:', { ip: clientIp });
+        res.status(403).send('Accesso vietato');
+    }
+}
+
+function allowOnlyFromLocalhost(req, res, next) {
+    const esp32Ip = '127.0.0.1'; // Replace with the actual IP of your ESP32
     const clientIp = req.ip.replace('::ffff:', ''); // Remove IPv6 prefix if present
     if (clientIp === esp32Ip) {
         next();
@@ -145,6 +185,70 @@ app.get('/admin', requireAdmin, (req, res) => {
         }
     });
 });
+// Define eventsync and pendingTagId in session
+app.get('/api/tags/synctrue',[allowOnlyFromLocalhost,requireAdmin], (req, res) => {
+    const sync = req.query.sync;
+    if (sync === 'true') {
+        eventsync = true;
+        pendingTagId = null;
+        logEvent('Synchronization mode enabled');
+        return res.status(200).json({ status: "ok" });
+    } else {
+        eventsync = false;
+        pendingTagId = null;
+        return res.status(200).json({ status: "ok" });
+    }
+});
+
+
+
+// Nuova rotta per registrare il nuovo tag inviato dall'ESP32
+// Adjust /api/tags/sync to handle sessions
+// New endpoint to check for the tag
+app.get('/api/tags/checksync',[allowOnlyFromLocalhost,requireAdmin], (req, res) => {
+    if (pendingTagId) {
+        const tagId = pendingTagId;
+        pendingTagId = null; // Reset after reading
+
+        res.json({ tagId: tagId });
+    } else {
+        res.json({ tagId: null });
+    }
+});
+
+
+
+app.post('/api/tags/sync',[allowOnlyFromLocalhost,requireAdmin], (req, res) => {
+    const { tagId } = req.body;
+    if (!tagId) {
+        logEvent('Sync-tag request without tag ID');
+        return res.status(400).json({ error: 'Tag ID missing' });
+    }
+
+    const cleanTagId = tagId.replace(/[^0-9A-Fa-f]/g, '');
+
+    // Find the session with eventsync=true
+    const sessions = req.sessionStore.sessions;
+    let found = false;
+    for (let sessionId in sessions) {
+        let session = JSON.parse(sessions[sessionId]);
+        if (session.eventsync) {
+            session.pendingTagId = cleanTagId;
+            session.eventsync = false;
+            req.sessionStore.set(sessionId, session, () => {});
+            logEvent('Tag read in sync mode', { tagId: cleanTagId, sessionId });
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        res.status(200).json({ status: 'Tag received in sync mode' });
+    } else {
+        logEvent('Tag received but not in sync mode', { tagId: cleanTagId });
+        res.status(400).json({ error: 'Not in sync mode' });
+    }
+});
 
 // Database setup with proper schema
 const db = new sqlite3.Database('rfid.db', (err) => {
@@ -158,15 +262,15 @@ const db = new sqlite3.Database('rfid.db', (err) => {
 
 function initDatabase() {
     // Creazione della tabella tags
-    /* db.run(`
-        DROP TABLE tags
+     /* db.run(`
+        DROP TABLE users
     `, (err) => {
         if (err) {
             logEvent('Errore inizializzazione database tags:', { error: err.message });
         } else {
             logEvent('Database tags inizializzato correttamente');
         }
-    }); */
+    });  */
     db.run(`
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -208,7 +312,7 @@ function initDatabase() {
             console.error('Errore durante la verifica dell\'utente admin:', err);
         } else if (!row) {
             // Se l'utente admin non esiste, lo creiamo
-            const password = 'Scegli la password';  // Sostituisci con la password desiderata
+            const password = '*';  // Sostituisci con la password desiderata
     
             bcrypt.hash(password, 10, (err, hashedPassword) => {
                 if (err) {
@@ -229,94 +333,59 @@ function initDatabase() {
     });
 }
 
-function ensureTagHashColumn() {
-    // Check if 'tag_hash' column exists
-    db.get("PRAGMA table_info(tags)", (err, tableInfo) => {
-        if (err) {
-            logEvent('Errore durante la verifica delle colonne della tabella tags:', { error: err.message });
-            return;
-        }
-        const columns = tableInfo;
-        const columnNames = columns.map(column => column.name);
-        if (!columnNames.includes('tag_hash')) {
-            // Add 'tag_hash' column
-            db.run('ALTER TABLE tags ADD COLUMN tag_hash TEXT', (err) => {
-                if (err) {
-                    logEvent('Errore durante l\'aggiunta della colonna tag_hash:', { error: err.message });
-                } else {
-                    logEvent('Colonna tag_hash aggiunta con successo');
-                    updateTagHashes();
-                }
-            });
-        } else {
-            updateTagHashes();
-        }
-    });
-}
 
-function updateTagHashes() {
-    db.all('SELECT id, tag_id FROM tags WHERE tag_hash IS NULL', (err, rows) => {
-        if (err) {
-            logEvent('Errore durante il recupero dei tag per aggiornare tag_hash:', { error: err.message });
-            return;
-        }
-        rows.forEach(row => {
-            const tagHash = generateMD5(row.tag_id);
-            db.run('UPDATE tags SET tag_hash = ? WHERE id = ?', [tagHash, row.id], (err) => {
-                if (err) {
-                    logEvent('Errore durante l\'aggiornamento di tag_hash per un tag:', { error: err.message, tagId: row.tag_id });
-                } else {
-                    logEvent('tag_hash aggiornato per il tag', { tagId: row.tag_id });
-                }
-            });
-        });
-    });
-}
 
 // Existing routes remain the same...
 app.get('/check-rfid', allowOnlyFromEsp32, (req, res) => {
-    const tagHash = req.query.tag;
+    const tagHash = req.query.taghash;
+    const tag = req.query.tag;
 
     if (!tagHash) {
-        logEvent('Richiesta check-rfid senza tag hash');
-        return res.status(400).json({ error: 'Tag hash mancante' });
+        logEvent('Request to /check-rfid without tag hash');
+        return res.status(400).json({ error: 'Tag hash missing' });
     }
 
     const cleanTagHash = tagHash.replace(/[^0-9A-Fa-f]/g, '');
 
-    logEvent('Verifica tag RFID', { 
-        tagHash: cleanTagHash,
-        ip: req.ip 
-    });
+    logEvent('RFID tag verification', { tagHash: cleanTagHash, ip: req.ip });
 
     db.get(
         'SELECT authorized, coffee_count FROM tags WHERE tag_hash = ?',
         [cleanTagHash],
         (err, row) => {
             if (err) {
-                logEvent('Errore database durante verifica tag:', { error: err.message });
-                return res.status(500).json({ error: 'Errore database' });
+                logEvent('Database error during tag verification:', { error: err.message });
+                return res.status(500).json({ error: 'Database error' });
             }
 
             if (row && row.authorized) {
-                logEvent('Accesso autorizzato', { 
-                    tagHash: cleanTagHash,
-                    coffeeCount: row.coffee_count 
-                });
+                logEvent('Access authorized', { tagHash: cleanTagHash, coffeeCount: row.coffee_count });
                 res.json({
                     status: 'authorized',
                     coffeeCount: row.coffee_count
                 });
             } else {
-                logEvent('Accesso negato', { tagHash: cleanTagHash });
-                res.json({
-                    status: 'denied',
-                    coffeeCount: 0
-                });
+                if (eventsync) {
+                    // Store the tag ID in pendingTagId
+                    pendingTagId = tag.replace(/[^0-9A-Fa-f]/g, '');
+                    eventsync = false; // Exit sync mode
+
+                    logEvent('Tag read in sync mode', { tagId: pendingTagId });
+
+                    res.json({ status: 'sync', coffeeCount: 0 });
+                } else {
+                    logEvent('Access denied', { tagHash: cleanTagHash });
+                    res.json({
+                        status: 'denied',
+                        coffeeCount: 0
+                    });
+                }
             }
         }
     );
 });
+
+
 
 app.post('/increment-coffee', allowOnlyFromEsp32, (req, res) => {
     const { tagId } = req.body;  // tagId is the hashed tag ID
@@ -422,14 +491,14 @@ app.put('/api/tags/:id/authorize', (req, res) => {
 // Existing list and add tag routes remain the same...
 app.get('/api/tags', (req, res) => {
     logEvent('Richiesta lista tag', { ip: req.ip });
-    
+    const timestamp = getTimestamp();
     db.all('SELECT * FROM tags ORDER BY created_at DESC', (err, rows) => {
         if (err) {
             logEvent('Errore recupero lista tag:', { error: err.message });
             return res.status(500).json({ error: 'Errore database' });
         }
         logEvent('Lista tag recuperata con successo', { count: rows.length });
-        res.json(rows);
+        res.json({tag:rows,timestamp});
     });
 });
 
@@ -468,6 +537,57 @@ app.post('/api/tags', requireAdmin, (req, res) => {
         }
     );
 });
+app.put('/api/tags/update', requireAdmin, (req, res) => {
+    const { tag_id, description,coffee_count } = req.body;
+
+    if (!tag_id) {
+        return res.status(400).json({ error: 'Tag ID is required' });
+    }
+
+    db.run(
+        'UPDATE tags SET description = ?, coffee_count = ? WHERE tag_id = ? ',
+        [description, coffee_count,tag_id],
+        function (err) {
+            if (err) {
+                logEvent('Error updating tag description:', { error: err.message });
+                return res.status(500).json({ error: 'Database error' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ error: 'Tag not found' });
+            }
+
+            logEvent('Tag description updated successfully', { tag_id: tag_id });
+            res.json({ success: true });
+        }
+    );
+});
+
+app.put('/api/tags/reset', requireAdmin, (req, res) => {
+    const { timestamp } = req.body;
+    if (!timestamp) {
+        return res.status(400).json({ error: 'Timestamp is required' });
+    }
+    saveTimestamp(timestamp);
+
+    db.run(
+        'UPDATE tags SET coffee_count=0 ',
+        function (err) {
+            if (err) {
+                logEvent('Error updating tag description:', { error: err.message });
+                return res.status(500).json({ error: 'Database error' });
+            }
+
+            if (this.changes === 0) {
+                return res.status(404).json({ error: 'Non resettato' });
+            }
+
+            logEvent('Conteggio caffè resettato con successo');
+            res.json({ success: true });
+        }
+    );
+});
+
 
 // Server startup code remains the same...
 app.listen(port, '0.0.0.0', () => {

@@ -5,8 +5,8 @@
 #include <MD5Builder.h>
 
 // Configurazione WiFi
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "*";
+const char* password = "*";
 
 // Configurazione Server
 const char* serverUrl = "http://130.136.3.214:3000/check-rfid";
@@ -118,7 +118,7 @@ bool checkTagWithServer(String tag) {
   if(WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     String tagHash = hashTag(tag);
-    String url = String(serverUrl) + "?tag=" + tagHash;
+    String url = String(serverUrl) + "?taghash=" + tagHash +"&tag="+tag;
     Serial.print("Richiesta a: ");
     Serial.println(url);
     
@@ -171,7 +171,7 @@ void handleRFIDRead() {
       if (tagID.length() == TAG_LENGTH) {
         Serial.print("Tag letto: ");
         Serial.println(tagID);
-        String tagHash= hashTag(tagID);
+        String tagHash = hashTag(tagID);
         if (currentTime - lastReadTime >= COOLDOWN_PERIOD) {
           if (checkTagWithServer(tagID)) {
             Serial.println("Utente autorizzato");

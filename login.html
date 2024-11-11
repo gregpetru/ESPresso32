@@ -3,16 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>ESPresso32 Login</title>
+    <link rel="icon" type="image/png" href="coffee.png"> 
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f3f4f6;
+        }
+        .login-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .login-container h2 {
+            font-size: 1.8rem;
+            color: #333333;
+            margin-bottom: 1rem;
+        }
+        .login-container label {
+            display: block;
+            font-size: 0.9rem;
+            color: #555555;
+            margin-top: 1rem;
+            text-align: left;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #dddddd;
+            font-size: 1rem;
+            color: #333333;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #4CAF50;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #45a049;
+        }
+        .login-container .logo {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+        }
+        .login-container p {
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <h2>Login</h2>
-    <form action="/login" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        <button type="submit">Accedi</button>
-    </form>
+    <div class="login-container">
+        <div class="logo">☕ ESPresso Login</div>
+        <h2>Benvenuto!</h2>
+        <form action="/login" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Accedi</button>
+        </form>
+        <p>Non hai un account? <a href="/register">Registrati</a></p>
+    </div>
 </body>
 </html>
