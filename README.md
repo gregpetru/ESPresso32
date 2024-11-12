@@ -25,7 +25,11 @@ Questa funzione incrementa il numero di caffè consumati per un tag RFID specifi
 
 Il progetto è organizzato come segue:
 
-. ├── server.js # File principale del server 💻 ├── utils.js # Funzioni di utilità 🛠️ └── README.md # Questo file 📄
+  ├── server.js # File principale del server 💻 
+
+  ├── utils.js # Funzioni di utilità 🛠️ 
+
+  └── README.md # Questo file 📄
 
 
 - **server.js**: Gestisce le richieste HTTP e interagisce con il database SQLite per verificare e aggiornare i dati. 🖥️
@@ -55,65 +59,55 @@ npm start
 ```
 Il server sarà in esecuzione su http://localhost:3000. 🌐
 
-API Endpoints 🛠️
-1. GET /check-rfid 🔍
+## API Endpoints 🛠️
+### 1. **GET /check-rfid** 🔍
 Verifica l'autorizzazione di un tag RFID.
 
-Query Parameters:
+- **Query Parameters:**
 
-taghash: Il codice hash del tag RFID. 🏷️
-tag: Il tag RFID. 💳
-Risposta:
+    - **taghash**: Il codice hash del tag RFID. 🏷️
+    - **tag**: Il tag RFID. 💳
 
-status: 'authorized': Se il tag è autorizzato. ✅
-status: 'denied': Se il tag non è autorizzato. ❌
-status: 'sync': Se il sistema è in modalità sincronizzazione. ⏳
-coffeeCount: Il numero di caffè consumati. ☕🎉
-2. POST /increment-coffee 🔼☕
+- **Risposta**:
+
+    - **status**: 'authorized': Se il tag è autorizzato. ✅
+    - **status**: 'denied': Se il tag non è autorizzato. ❌
+    - **status**: 'sync': Se il sistema è in modalità sincronizzazione. ⏳
+    - **coffeeCount**: Il numero di caffè consumati. ☕🎉
+### 2. **POST /increment-coffee** 🔼☕
 Incrementa il conteggio dei caffè consumati per un tag RFID.
 
-Body:
+- **Body:**
 
-tagId: Il codice hash del tag RFID. 💳
-Risposta:
+    - **tagId**: Il codice hash del tag RFID. 💳
+- **Risposta**:
 
-coffeeCount: Il nuovo conteggio dei caffè consumati. ☕🎯
-Log degli Eventi 📜
+    - **coffeeCount**: Il nuovo conteggio dei caffè consumati. ☕🎯
+---
+### Log degli Eventi 📜
 Ogni operazione viene registrata nei log, inclusi gli errori e le azioni effettuate. Questo consente di tracciare facilmente le operazioni eseguite sul sistema. 📝
 
-Contribuire 🤝
-Fai un fork del repository. 🍴
-Crea un branch per la tua feature (git checkout -b feature-name). 🌱
-Fai il commit delle tue modifiche (git commit -am 'Aggiungi nuova feature'). 💬
-Pusha il branch (git push origin feature-name). 🚀
-Apri una pull request. 🔄
-Licenza 📄
-Distribuito sotto la Licenza MIT. Vedi il file LICENSE per maggiori informazioni. 📜
+---
+### Licenza 📄
+Distribuito sotto la Licenza MIT. Vedi il file [LICENSE](LICENSE) per maggiori informazioni. 📜
 
 Questo progetto è in continua evoluzione. Sentiti libero di contribuire con nuove funzionalità o miglioramenti. 🌱💻
+---
+### 🔧 Tecnologie utilizzate:
 
-🔧 Tecnologie utilizzate:
+    - Node.js: Il server backend 🖥️
+    - SQLite: Il database utilizzato per memorizzare i tag RFID e i conteggi caffè 📊
+    - Express: Il framework per la gestione delle rotte HTTP 🚀
+### 🔍 Funzionalità principali:
 
-Node.js: Il server backend 🖥️
-SQLite: Il database utilizzato per memorizzare i tag RFID e i conteggi caffè 📊
-Express: Il framework per la gestione delle rotte HTTP 🚀
-🔍 Funzionalità principali:
-
-Gestione delle autorizzazioni RFID ✅
-Tracciamento del numero di caffè consumati ☕
-Modalità di sincronizzazione 🕰️
+    - Gestione delle autorizzazioni RFID ✅
+    - Tracciamento del numero di caffè consumati ☕
+    - Modalità di sincronizzazione 🕰️
 Grazie per aver visitato il progetto! 🙌
 
-markdown
-Copia codice
 
-### Cosa c'è di nuovo:
 
-- **Emoticon**: Ho aggiunto emoticon per enfatizzare le sezioni e le funzionalità. Ogni parte del README ha un'icona rappresentativa.
-- **Sezioni visive**: Ho suddiviso il README in sezioni con emoticon per rendere più visibili le funzionalità principali e le istruzioni di utilizzo.
-- **Descrizione dettagliata**: Ogni endpoint e funzionalità ha una descrizione arricchita da icone, con l'intento di migliorare la leggibilità e l'interesse per chi consulta il progetto.
 
-Puoi copiare e incollare direttamente questo README nel tuo repository GitHub!
 
 
 
