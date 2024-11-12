@@ -244,7 +244,7 @@ CREATE TABLE tags (
 
 ## Troubleshooting 🔧
 
-### Problemi Comuni
+1. Attendere almeno 2 minuti alla prima accensione
 
 
 
