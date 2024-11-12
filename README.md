@@ -1,17 +1,121 @@
-# Caffe-adm
+# ESPresso32 ☕️
+# RFID Coffee Machine  ☕💳
 
-## Architettura
-Il sistema consiste di due componenti principali:
- * lettore di badge
- * server
+Un'applicazione per la gestione di una **macchina del caffè** controllata tramite **tag RFID**. Gli utenti possono utilizzare un tag RFID per accedere alla macchina e incrementare il conteggio dei caffè consumati. 🛠️
 
-### Lettore di badge
-Il lettore di badge è composto di una scheda ESP32, lettore di RFID a bassa frequenza e due relé. 
-Quando un utente passa il badge sopra il lettore, il badge viene letto per ottenere l'ID. L'ID viene hashato con MD5 e comunicato al server. In base alla risposta del server, i relé vengono sbloccati oppure no.
-I due relé comandano rispettivamente l'alimentazione della macchina da caffé e il pulsante di erogazione. All'arrivo dell'autorizzazione, vengono aperti entrambi. Una volta erogato il caffé, viene bloccato il secondo, una volta trascorsi 5 minuti senza erogazione di caffé anche il primo viene chiuso.
+## Descrizione 🌟
 
-### Server
-Il server offre diversi servizi: controllo dell'autorizzazione, autenticazione alla piattaforma di caricamento crediti e piattaforma di caricamento crediti.
+Questo progetto consente a un sistema basato su **RFID** di gestire l'accesso e il conteggio dei caffè consumati tramite un **tag RFID** unico per ogni utente. Le funzionalità principali includono:
 
-Quando l'ESP32 comunica un hash al server, il server controlla che l'hash sia in database (associato ad un utente). Se questo è il caso risponde positivamente alla scheda di controllo e aumenta il contatore dei caffé relativo all'utente. 
-*...continua*
+- **Verifica del Tag RFID**: il sistema verifica se un tag RFID è autorizzato e restituisce il numero di caffè consumati dall'utente. ✅
+- **Incremento del Conteggio Caffè**: consente di incrementare il conteggio dei caffè consumati per un determinato tag RFID. ⬆️☕
+- **Modalità Sincronizzazione**: se il sistema è in modalità sincronizzazione, i tag non autorizzati vengono messi in attesa. ⏳
+
+## Funzionalità 🚀
+
+### 1. **Verifica RFID (`check_rfid`)** 🕵️‍♂️
+Questa funzione accetta un tag RFID e verifica se il tag è autorizzato. Se il tag è autorizzato, restituisce il numero di caffè consumati. Se il tag non è autorizzato, la risposta dipende dalla modalità del sistema (sincronizzazione o meno).
+
+### 2. **Incremento Conteggio Caffè (`increment_coffe`)** 🍵
+Questa funzione incrementa il numero di caffè consumati per un tag RFID specifico. Se il tag è valido, il conteggio verrà aggiornato nel database.
+
+---
+
+## Struttura del Progetto 🗂️
+
+Il progetto è organizzato come segue:
+
+. ├── server.js # File principale del server 💻 ├── utils.js # Funzioni di utilità 🛠️ └── README.md # Questo file 📄
+
+yaml
+Copia codice
+
+- **server.js**: Gestisce le richieste HTTP e interagisce con il database SQLite per verificare e aggiornare i dati. 🖥️
+- **utils.js**: Contiene funzioni di utilità come la gestione dei log e l'interazione con il database. 🔧
+
+---
+
+## Installazione 🛠️
+
+1. **Clona il repository**:
+
+```bash
+git clone https://github.com/tuo-username/rfid-coffee-machine.git
+cd rfid-coffee-machine
+Installa le dipendenze:
+bash
+Copia codice
+npm install
+Configura il database. Se stai usando SQLite, assicurati che il file del database (database.db) sia presente o configurato correttamente. 📂
+
+Avvia il server:
+
+bash
+Copia codice
+npm start
+Il server sarà in esecuzione su http://localhost:3000. 🌐
+
+API Endpoints 🛠️
+1. GET /check-rfid 🔍
+Verifica l'autorizzazione di un tag RFID.
+
+Query Parameters:
+
+taghash: Il codice hash del tag RFID. 🏷️
+tag: Il tag RFID. 💳
+Risposta:
+
+status: 'authorized': Se il tag è autorizzato. ✅
+status: 'denied': Se il tag non è autorizzato. ❌
+status: 'sync': Se il sistema è in modalità sincronizzazione. ⏳
+coffeeCount: Il numero di caffè consumati. ☕🎉
+2. POST /increment-coffee 🔼☕
+Incrementa il conteggio dei caffè consumati per un tag RFID.
+
+Body:
+
+tagId: Il codice hash del tag RFID. 💳
+Risposta:
+
+coffeeCount: Il nuovo conteggio dei caffè consumati. ☕🎯
+Log degli Eventi 📜
+Ogni operazione viene registrata nei log, inclusi gli errori e le azioni effettuate. Questo consente di tracciare facilmente le operazioni eseguite sul sistema. 📝
+
+Contribuire 🤝
+Fai un fork del repository. 🍴
+Crea un branch per la tua feature (git checkout -b feature-name). 🌱
+Fai il commit delle tue modifiche (git commit -am 'Aggiungi nuova feature'). 💬
+Pusha il branch (git push origin feature-name). 🚀
+Apri una pull request. 🔄
+Licenza 📄
+Distribuito sotto la Licenza MIT. Vedi il file LICENSE per maggiori informazioni. 📜
+
+Questo progetto è in continua evoluzione. Sentiti libero di contribuire con nuove funzionalità o miglioramenti. 🌱💻
+
+🔧 Tecnologie utilizzate:
+
+Node.js: Il server backend 🖥️
+SQLite: Il database utilizzato per memorizzare i tag RFID e i conteggi caffè 📊
+Express: Il framework per la gestione delle rotte HTTP 🚀
+🔍 Funzionalità principali:
+
+Gestione delle autorizzazioni RFID ✅
+Tracciamento del numero di caffè consumati ☕
+Modalità di sincronizzazione 🕰️
+Grazie per aver visitato il progetto! 🙌
+
+markdown
+Copia codice
+
+### Cosa c'è di nuovo:
+
+- **Emoticon**: Ho aggiunto emoticon per enfatizzare le sezioni e le funzionalità. Ogni parte del README ha un'icona rappresentativa.
+- **Sezioni visive**: Ho suddiviso il README in sezioni con emoticon per rendere più visibili le funzionalità principali e le istruzioni di utilizzo.
+- **Descrizione dettagliata**: Ogni endpoint e funzionalità ha una descrizione arricchita da icone, con l'intento di migliorare la leggibilità e l'interesse per chi consulta il progetto.
+
+Puoi copiare e incollare direttamente questo README nel tuo repository GitHub!
+
+
+
+
+
