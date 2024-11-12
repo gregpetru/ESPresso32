@@ -253,12 +253,10 @@ CREATE TABLE tags (
 
 ## Licenza 📜
 
-Questo progetto è rilasciato sotto licenza MIT - usalo come vuoi, ma offri un caffè a chi lo ha creato! 😉
-
-## Credits ❤️
+Questo progetto è rilasciato sotto [Licenza MIT](LICENSE)  - usalo come vuoi, ma offri un caffè a chi lo ha creato! 😉
 
 
----
-
+<div align=center>
 Made with ❤️ and way too much ☕️
+</div>
 
