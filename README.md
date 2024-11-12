@@ -27,8 +27,6 @@ Il progetto è organizzato come segue:
 
 . ├── server.js # File principale del server 💻 ├── utils.js # Funzioni di utilità 🛠️ └── README.md # Questo file 📄
 
-yaml
-Copia codice
 
 - **server.js**: Gestisce le richieste HTTP e interagisce con il database SQLite per verificare e aggiornare i dati. 🖥️
 - **utils.js**: Contiene funzioni di utilità come la gestione dei log e l'interazione con il database. 🔧
@@ -40,19 +38,21 @@ Copia codice
 1. **Clona il repository**:
 
 ```bash
-git clone https://github.com/tuo-username/rfid-coffee-machine.git
-cd rfid-coffee-machine
+git clone https://github.com/gregpetru/ESPresso32
+cd ESPresso32
+```
+
 Installa le dipendenze:
-bash
-Copia codice
+```bash
 npm install
+```
 Configura il database. Se stai usando SQLite, assicurati che il file del database (database.db) sia presente o configurato correttamente. 📂
 
 Avvia il server:
 
-bash
-Copia codice
+```bash
 npm start
+```
 Il server sarà in esecuzione su http://localhost:3000. 🌐
 
 API Endpoints 🛠️
