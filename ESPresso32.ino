@@ -3,14 +3,16 @@
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <MD5Builder.h>
+#include <WiFiClientSecure.h>
+#include "config.h"
 
-// Configurazione WiFi
-const char* ssid = "*";
-const char* password = "*";
 
 // Configurazione Server
-const char* serverUrl = "http://130.136.3.214:3000/check-rfid";
-const char* incrementUrl = "http://130.136.3.214:3000/increment-coffee";
+const char* serverUrl = BASE_URL+"check-rfid";
+const char* incrementUrl = BASE_URL+"increment-coffee";
+
+WiFiClientSecure client;
+
 
 // Pin configurazione
 const int COFFEE_RELAY_PIN = 15;    // Relè caffè (invariato)
@@ -79,6 +81,7 @@ void setup() {
   Serial.println("\nConnesso al WiFi");
   Serial.print("Indirizzo IP: ");
   Serial.println(WiFi.localIP());
+  client.setCACert(ssl_cert);
 }
 
 void setLEDColor(bool red, bool green, bool blue) {
@@ -122,7 +125,7 @@ bool checkTagWithServer(String tag) {
     Serial.print("Richiesta a: ");
     Serial.println(url);
     
-    http.begin(url);
+    http.begin(client,url);
     int httpResponseCode = http.GET();
     
     if (httpResponseCode == 200) {
@@ -210,7 +213,7 @@ void incrementCoffeeCount() {
   if (!currentAuthorizedTag.isEmpty()) {
     HTTPClient http;
     
-    http.begin(incrementUrl);
+    http.begin(client,incrementUrl);
     http.addHeader("Content-Type", "application/json");
     
     String jsonBody = "{\"tagId\":\"" + currentAuthorizedTag + "\"}";
