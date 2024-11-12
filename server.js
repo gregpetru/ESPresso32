@@ -8,6 +8,8 @@ const { log } = require('console');
 const utils=require('./utils');
 const apiFront=require('./apiFrontend');
 const apiESP=require('./apiESP');
+const RedisStore = require('connect-redis').default;
+const redis = require('redis');
 
 const app = express();
 console.log(app._router);
@@ -18,10 +20,27 @@ const certificate = fs.readFileSync(process.env.PathCert, 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 require('dotenv').config();
 
+// Crea il client Redis
+const redisClient = redis.createClient({
+    url: 'redis://localhost:6379'  // Usa il formato URL per Redis v4
+  });
+  
+  // Gestisci la connessione di Redis
+  redisClient.connect()
+    .then(() => {
+      console.log('Connesso a Redis');
+    })
+    .catch((err) => {
+      console.error('Errore di connessione a Redis:', err);
+      process.exit(1);  // Esce con un errore se la connessione a Redis fallisce
+    });
+
 app.use(session({
-    secret: process.env.Secret,  // Sostituisci con una chiave sicura
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.Secret,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: { secure: true }  // Imposta su `true` se utilizzi HTTPS
 }));
 
 // Middleware setup
