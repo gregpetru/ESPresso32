@@ -13,8 +13,8 @@ const app = express();
 console.log(app._router);
 const port = 3000;
 
-const privateKey = fs.readFileSync(process.env.Path-key, 'utf8');
-const certificate = fs.readFileSync(process.env.Path-cert, 'utf8');
+const privateKey = fs.readFileSync(process.env.PathKey, 'utf8');
+const certificate = fs.readFileSync(process.env.PathCert, 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 require('dotenv').config();
 
