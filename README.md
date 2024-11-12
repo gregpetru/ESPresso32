@@ -246,10 +246,7 @@ CREATE TABLE tags (
 
 ### Problemi Comuni
 
-1. **LED Rosso Fisso** ❌
-   - Controlla il WiFi
-   - Verifica il server
-   - Riavvia 
+
 
 ## Licenza 📜
 
