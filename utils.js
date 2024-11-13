@@ -28,7 +28,8 @@ function allowOnlyFromLocalhost(req, res, next) {
 }
 
 function allowOnlyFromEsp32(req, res, next) {
-    const esp32Ip = process.env.Ip-ESP-NAT; // Replace with the actual IP of your ESP32
+    const esp32Ip = process.env.IpESPNAT; // Replace with the actual IP of your ESP32
+    logEvent('l ip è: ',esp32Ip);
     const clientIp = req.ip.replace('::ffff:', ''); // Remove IPv6 prefix if present
     if (clientIp === esp32Ip) {
         next();

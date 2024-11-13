@@ -66,13 +66,13 @@ app.post('/login', (req, res) => {
 app.get('/admin', utils.requireAdmin, (req, res) => {
     apiFront.admin(req,res);
 });
-app.get('/api/tags/synctrue',[ utils.allowOnlyFromLocalhost,utils.requireAdmin], (req, res) => {
+app.get('/api/tags/synctrue',[ utils.requireAdmin], (req, res) => {
     apiFront.syncTrue(req,res);
 });
-app.get('/api/tags/checksync',[ utils.allowOnlyFromLocalhost,utils.requireAdmin], (req, res) => {
+app.get('/api/tags/checksync',[ utils.requireAdmin], (req, res) => {
     apiFront.checksync(req,res);
 });
-app.post('/api/tags/sync',[ utils.allowOnlyFromLocalhost, utils.requireAdmin], (req, res) => {
+app.post('/api/tags/sync',[ utils.requireAdmin], (req, res) => {
     apiFront.sync(req,res);
 });
 app.delete('/api/tags/:id', utils.requireAdmin,(req, res) => {
