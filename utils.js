@@ -16,16 +16,6 @@ function requireAdmin(req, res, next) {
     }
 }
 
-function allowOnlyFromLocalhost(req, res, next) {
-    const esp32Ip = '127.0.0.1'; // Replace with the actual IP of your ESP32
-    const clientIp = req.ip.replace('::ffff:', ''); // Remove IPv6 prefix if present
-    if (clientIp === esp32Ip) {
-        next();
-    } else {
-        logEvent('Accesso non autorizzato tentato da IP:', { ip: clientIp });
-        res.status(403).send('Accesso vietato');
-    }
-}
 
 function allowOnlyFromEsp32(req, res, next) {
     const esp32Ip = process.env.IpESPNAT; // Replace with the actual IP of your ESP32
@@ -182,7 +172,6 @@ module.exports={logEvent,
     saveTimestamp,
     getTimestamp,
     allowOnlyFromEsp32,
-    allowOnlyFromLocalhost,
     requireAdmin,
     db,
     bcrypt,

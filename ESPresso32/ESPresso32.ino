@@ -81,7 +81,7 @@ void setup() {
   Serial.println("\nConnesso al WiFi");
   Serial.print("Indirizzo IP: ");
   Serial.println(WiFi.localIP());
-  client.setCACert(ssl_cert);
+  client.setInsecure();
 }
 
 void setLEDColor(bool red, bool green, bool blue) {
