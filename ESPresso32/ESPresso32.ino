@@ -7,9 +7,6 @@
 #include "config.h"
 
 
-// Configurazione Server
-const char* serverUrl = BASE_URL+"check-rfid";
-const char* incrementUrl = BASE_URL+"increment-coffee";
 
 WiFiClientSecure client;
 

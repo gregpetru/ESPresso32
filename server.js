@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const https = require('https');
+const http=require('http');
 const fs = require('fs');
 const session = require('express-session');
 const { log } = require('console');
@@ -13,7 +14,7 @@ const redis = require('redis');
 
 const app = express();
 console.log(app._router);
-const port = 3000;
+const port = 443;
 
 const privateKey = fs.readFileSync(process.env.PathKey, 'utf8');
 const certificate = fs.readFileSync(process.env.PathCert, 'utf8');
@@ -129,4 +130,12 @@ https.createServer(credentials,app).listen(port, '0.0.0.0', () => {
             console.log(`- https://${ip}:${port}`);
         }
     }
+});
+
+http.createServer((req, res) => {
+    // Reindirizza alla versione HTTPS mantenendo l'URL di richiesta originale
+    res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+    res.end();
+}).listen(80, '0.0.0.0',() => {
+    console.log('Server HTTP in ascolto sulla porta 80 per il reindirizzamento a HTTPS');
 });
