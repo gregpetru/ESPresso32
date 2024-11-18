@@ -66,7 +66,7 @@ function increment_coffe(req,res){
     });
 
     utils.db.run(
-        'UPDATE tags SET coffee_count = coffee_count + 1, last_used = CURRENT_TIMESTAMP WHERE tag_hash = ?',
+        'UPDATE tags SET coffee_count = coffee_count + 1, last_used = datetime(\'now\',\'localtime\') WHERE tag_hash = ?',
         [cleanTagHash],
         function(err) {
             if (err) {
