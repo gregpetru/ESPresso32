@@ -223,7 +223,7 @@ CREATE TABLE tags (
 
 2. **Setup Software**
    ```bash
-   git clone https://github.com/tuouser/espresso32
+   git clone [https://github.com/tuouser/espresso32](https://github.com/gregpetru/ESPresso32.git)
    cd espresso32
    npm install
    # Fatti un caffè mentre installa
