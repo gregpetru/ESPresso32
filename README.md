@@ -168,7 +168,7 @@ CREATE TABLE tags (
     authorized BOOLEAN DEFAULT true, -- Puoi bere caffè?
     last_used DATETIME,             -- Ultimo caffè
     coffee_count INTEGER DEFAULT 0,  -- Quanti ne hai bevuti?
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT datetime('now','localtime')
 );
 ```
 
