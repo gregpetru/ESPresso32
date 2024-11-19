@@ -100,6 +100,9 @@ app.get('/check-rfid', utils.allowOnlyFromEsp32,(req, res) => {
 app.post('/increment-coffee', utils.allowOnlyFromEsp32, (req, res) => {
     apiESP.increment_coffe(req,res);
 });
+app.get('/api/stats',(req,res)=>{
+    apiFront.stats(req,res);
+});
 
 
 https.createServer(credentials,app).listen(port, '0.0.0.0', () => {

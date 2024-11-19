@@ -137,6 +137,20 @@ function initDatabase() {
             logEvent('Database users inizializzato correttamente');
         }
     });
+    db.run(`
+        CREATE TABLE IF NOT EXISTS coffee_consumptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tag_id TEXT NOT NULL,
+            consumption_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
+        )
+    `, (err)=> {
+        if (err) {
+            logEvent('Errore inizializzazione database users:', { error: err.message });
+        } else {
+            logEvent('Database users inizializzato correttamente');
+        }
+    });
 
     db.get('SELECT * FROM users WHERE username = ?', ['admin'], (err, row) => {
         if (err) {

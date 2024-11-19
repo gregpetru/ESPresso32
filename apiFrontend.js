@@ -365,6 +365,52 @@ function reset(req,res){
         }
     );
 }
+async function stats(req, res) {
+    try {
+        const now = new Date();
+
+        // Query per i dati giornalieri
+        const daily = await new Promise((resolve, reject) => {
+            utils.db.all(
+                `SELECT COUNT(*) AS count, DATE(consumption_time, 'localtime') AS date
+                 FROM coffee_consumptions
+                 GROUP BY DATE(consumption_time, 'localtime')
+                 ORDER BY date DESC
+                 LIMIT 7;`, 
+                (err, rows) => {
+                    if (err) return reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+
+        // Query per i dati settimanali
+        const weekly = await new Promise((resolve, reject) => {
+            utils.db.all(
+                `SELECT 
+                    strftime('%Y-%W', consumption_time, 'localtime') AS week,
+                    COUNT(*) AS total
+                 FROM coffee_consumptions
+                 GROUP BY week
+                 ORDER BY week DESC
+                 LIMIT 4;`, 
+                (err, rows) => {
+                    if (err) return reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+
+        // Risposta JSON
+        res.json({
+            daily: daily.map(row => ({ date: row.date, count: row.count })),
+            weekly: weekly.map(row => ({ week: row.week, total: row.total }))
+        });
+    } catch (error) {
+        utils.logEvent('Errore nel recupero delle statistiche:', { error: error.message });
+        res.status(500).json({ error: 'Errore del server' });
+    }
+}
 
 module.exports={
     indexHtml,
@@ -380,7 +426,8 @@ module.exports={
     tags,
     tags_post,
     update,
-    reset
+    reset,
+    stats
 }
 
 

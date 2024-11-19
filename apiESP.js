@@ -89,7 +89,19 @@ function increment_coffe(req,res){
                     res.json({ coffeeCount: row.coffee_count });
                 }
             );
+            
         }
     );
+    const now = new Date();
+    utils.db.run(`INSERT INTO coffee_consumptions (tag_id) VALUES (?);`,[now],function(err) {
+        if (err) {
+            utils.logEvent('Errore incremento caffè:', { error: err.message });
+            return res.status(500).json({ error: 'Errore database' });
+        }else{
+            utils.logEvent('consumazione caffè incrementata con successo', { 
+                date: now
+            });
+        }
+    });
 }
 module.exports={increment_coffe,check_rfid};
