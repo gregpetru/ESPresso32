@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" type="image/png" href="coffee.png"> 
+    <link rel="icon" type="image/png" href="coffee-favicon.png"> 
     <script>
         async function checkAuth() {
             try {
@@ -25,7 +25,7 @@
     <header class="bg-green-600 text-white p-4 shadow-lg">
         <div class="container mx-auto text-center">
             <h1 class="text-2xl md:text-4xl font-extrabold tracking-wide flex items-center justify-center">
-                <i class="fas fa-coffee mr-3"></i> ESPresso32
+                <img rel="icon" class="w-16 mr-2" src="coffee-icon.png"> ESPresso32
             </h1>
         </div>
     </header>
@@ -33,24 +33,37 @@
     <main class="flex-grow container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         <!-- Form aggiunta tag -->
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-4 sm:mb-8">
-            <h2 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">Aggiungi Nuovo Tag</h2>
-            <form id="addTagForm" class="space-y-2 sm:space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Tag ID</label>
-                    <input type="text" id="tagId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <div class="flex gap-10">
+                <div class="w-3/5">
+                    <h2 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">Aggiungi Nuovo Tag</h2>
+                    <form id="addTagForm" class="space-y-2 sm:space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tag ID</label>
+                            <input type="text" id="tagId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nome e Cognome</label>
+                            <input type="text" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="submit" class="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700">Aggiungi</button>
+                            <button id="syncTagButton" class="bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-yellow-600">Sync</button>
+                            <button id="resetCoffeCount" class="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-red-600" onclick="resetCoffe()" type="button">Azzera conteggio</button>
+                            <label id="timestampLabel" class="ml-2 text-gray-500 text-xs sm:text-sm">Ultimo aggiornamento: Mai</label>
+                        </div>
+                        
+                    </form>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Nome e Cognome</label>
-                    <input type="text" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <div class="w-2/5">
+                    <div id="notifications" class="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md w-full h-full">
+                        <h2 class="text-lg sm:text-xl font-semibold mb-4">Notifiche</h2>
+                        <ul class="space-y-2" id="notificationsList">
+                            <!-- Notifiche dinamiche -->
+                            <!-- Esempio: <li class="text-sm text-gray-700">Nuovo tag aggiunto!</li> -->
+                        </ul>
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700">Aggiungi</button>
-                    <button id="syncTagButton" class="bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-yellow-600">Sync</button>
-                    <button id="resetCoffeCount" class="bg-red-500 text-white px-3 sm:px-4 py-2 rounded hover:bg-red-600" onclick="resetCoffe()" type="button">Azzera conteggio</button>
-                    <label id="timestampLabel" class="ml-2 text-gray-500 text-xs sm:text-sm">Ultimo aggiornamento: Mai</label>
-                </div>
-                
-            </form>
+            </div>
             <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md my-4">
                 <h2 class="text-lg sm:text-xl font-semibold mb-2">Statistiche sul consumo di caffè</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -122,7 +135,7 @@
                 // Genera il grafico giornaliero
                 const dailyCtx = document.getElementById('dailyCoffeeChart').getContext('2d');
                 new Chart(dailyCtx, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: dailyLabels,
                         datasets: [{
