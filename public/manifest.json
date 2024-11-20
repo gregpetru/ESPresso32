@@ -1,0 +1,52 @@
+{
+  "name": "ESPresso32",
+  "short_name": "ESPresso32",
+  "description": "Trasforma la tua macchina del caffè in un sistema smart con controllo RFID",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "coffee-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "coffee-favicon.png",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-login.png",
+      "type": "image/png",
+      "sizes": "1280x800",
+      "label": "Desktop Login"
+    },
+    {
+      "src": "screenshots/desktop-dash.png",
+      "type": "image/png",
+      "sizes": "1280x800",
+      "label": "Desktop Dashboard"
+    },
+    {
+      "src": "screenshots/mobile-login.png",
+      "type": "image/png",
+      "sizes": "360x640",
+      "label": "Mobile Login"
+    },
+    {
+      "src": "screenshots/mobile-dash.png",
+      "type": "image/png",
+      "sizes": "360x640",
+      "label": "Mobile Dashboard"
+    },
+    {
+      "src": "screenshots/mobile-stats.png",
+      "type": "image/png",
+      "sizes": "360x640",
+      "label": "Mobile Dashboard - Statistics"
+    }
+  ]
+}
