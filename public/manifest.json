@@ -19,31 +19,31 @@
   ],
   "screenshots": [
     {
-      "src": "screenshots/desktop-login.png",
+      "src": "screenshot/desktop-login.png",
       "type": "image/png",
       "sizes": "1280x800",
       "label": "Desktop Login"
     },
     {
-      "src": "screenshots/desktop-dash.png",
+      "src": "screenshot/desktop-dash.png",
       "type": "image/png",
       "sizes": "1280x800",
       "label": "Desktop Dashboard"
     },
     {
-      "src": "screenshots/mobile-login.png",
+      "src": "screenshot/mobile-login.jpg",
       "type": "image/png",
       "sizes": "360x640",
       "label": "Mobile Login"
     },
     {
-      "src": "screenshots/mobile-dash.png",
+      "src": "screenshot/mobile-dash.jpg",
       "type": "image/png",
       "sizes": "360x640",
       "label": "Mobile Dashboard"
     },
     {
-      "src": "screenshots/mobile-stats.png",
+      "src": "screenshot/mobile-stats.jpg",
       "type": "image/png",
       "sizes": "360x640",
       "label": "Mobile Dashboard - Statistics"
