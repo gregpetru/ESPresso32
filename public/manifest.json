@@ -9,11 +9,12 @@
   "icons": [
     {
       "src": "coffee-icon.png",
-      "sizes": "192x192",
+      "sizes": "500x500",
       "type": "image/png"
     },
     {
       "src": "coffee-favicon.png",
+      "sizes": "500x500",
       "type": "image/png"
     }
   ],
@@ -21,32 +22,37 @@
     {
       "src": "screenshot/desktop-login.png",
       "type": "image/png",
-      "sizes": "1280x800",
-      "label": "Desktop Login"
+      "sizes": "2988x1506",
+      "label": "Desktop Login",
+      "form_factor": "wide"
     },
     {
       "src": "screenshot/desktop-dash.png",
       "type": "image/png",
-      "sizes": "1280x800",
-      "label": "Desktop Dashboard"
+      "sizes": "2974x1500",
+      "label": "Desktop Dashboard",
+      "form_factor": "wide"
     },
     {
       "src": "screenshot/mobile-login.jpg",
       "type": "image/png",
-      "sizes": "360x640",
-      "label": "Mobile Login"
+      "sizes": "591x1139",
+      "label": "Mobile Login",
+      "form_factor": "narrow"
     },
     {
       "src": "screenshot/mobile-dash.jpg",
       "type": "image/png",
-      "sizes": "360x640",
-      "label": "Mobile Dashboard"
+      "sizes": "591x1137",
+      "label": "Mobile Dashboard",
+      "form_factor": "narrow"
     },
     {
       "src": "screenshot/mobile-stats.jpg",
       "type": "image/png",
-      "sizes": "360x640",
-      "label": "Mobile Dashboard - Statistics"
+      "sizes": "591x1137",
+      "label": "Mobile Dashboard - Statistics",
+      "form_factor": "narrow"
     }
   ]
 }
