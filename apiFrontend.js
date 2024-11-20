@@ -375,7 +375,7 @@ async function stats(req, res) {
                 `SELECT COUNT(*) AS count, DATE(consumption_time, 'localtime') AS date
                  FROM coffee_consumptions
                  GROUP BY DATE(consumption_time, 'localtime')
-                 ORDER BY date DESC
+                 ORDER BY date ASC
                  LIMIT 7;`, 
                 (err, rows) => {
                     if (err) return reject(err);
@@ -392,7 +392,7 @@ async function stats(req, res) {
                     COUNT(*) AS total
                  FROM coffee_consumptions
                  GROUP BY week
-                 ORDER BY week DESC
+                 ORDER BY week ASC
                  LIMIT 4;`, 
                 (err, rows) => {
                     if (err) return reject(err);
