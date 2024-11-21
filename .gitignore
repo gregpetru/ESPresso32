@@ -1,7 +1,6 @@
 file
 node_modules
 config.h
-package-lock.json
-package.json
+
 .env
 logs
