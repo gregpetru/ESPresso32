@@ -5,6 +5,7 @@
 #include <MD5Builder.h>
 #include <WiFiClientSecure.h>
 #include "config.h"
+#include <esp_wifi.h>
 
 
 
@@ -45,6 +46,13 @@ const unsigned long BLINK_INTERVAL = 500; // 0.5 secondi
 bool blinkState = false;
 bool isBlinking = false;
 
+IPAddress local_IP(130, 136, 201, 139);
+// Set your Gateway IP address
+IPAddress gateway(130, 136, 201, 190);
+
+IPAddress subnet(255, 255, 255, 192);
+IPAddress primaryDNS(1, 1, 1, 1);   //optional
+
 SoftwareSerial rfidSerial(RDM6300_RX_PIN, RDM6300_TX_PIN);
 
 String tagID = "";
@@ -69,7 +77,13 @@ void setup() {
   // Inizializza LED rosso (nessuno autenticato)
   setLEDColor(true, false, false);
   
+
+   // Configures static IP address
+  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS)) {
+    Serial.println("STA Failed to configure");
+  }
   WiFi.begin(ssid, password);
+
   Serial.print("Connessione al WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -79,8 +93,20 @@ void setup() {
   Serial.print("Indirizzo IP: ");
   Serial.println(WiFi.localIP());
   client.setInsecure();
+  readMacAddress();
 }
 
+void readMacAddress(){
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
+  } else {
+    Serial.println("Failed to read MAC address");
+  }
+}
 void setLEDColor(bool red, bool green, bool blue) {
   digitalWrite(LED_RED_PIN, red);
   digitalWrite(LED_GREEN_PIN, green);
