@@ -111,7 +111,7 @@ function initDatabase() {
             authorized BOOLEAN DEFAULT true,
             last_used DATETIME,
             coffee_count INTEGER DEFAULT 0,
-            created_at DATETIME DEFAULT datetime('now','localtime')
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     `, (err) => {
         if (err) {
@@ -128,7 +128,7 @@ function initDatabase() {
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             role TEXT DEFAULT 'user',  -- nuovo campo per il ruolo
-            created_at DATETIME DEFAULT datetime(\'now\',\'localtime\')
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     `, (err) => {
         if (err) {

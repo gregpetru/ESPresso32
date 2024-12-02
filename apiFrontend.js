@@ -83,6 +83,7 @@ function login_post(req,res){
                 utils.logEvent('Errore durante il confronto della password:', { error: err.message });
                 return res.status(500).send('Errore durante il login');
             }
+            console.log("ok");
 
             if (result && user.role === 'admin') {
                 // Autenticazione riuscita e ruolo admin

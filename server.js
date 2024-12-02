@@ -23,8 +23,10 @@ require('dotenv').config();
 
 // Crea il client Redis
 const redisClient = redis.createClient({
-    url: 'redis://localhost:6379'  // Usa il formato URL per Redis v4
+    url: 'redis://localhost:6379',
+    legacyMode: true   // Usa il formato URL per Redis v4
   });
+  
   
   // Gestisci la connessione di Redis
   redisClient.connect()
@@ -36,12 +38,14 @@ const redisClient = redis.createClient({
       process.exit(1);  // Esce con un errore se la connessione a Redis fallisce
     });
 
+
 app.use(session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.Secret,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true }  // Imposta su `true` se utilizzi HTTPS
+    cookie: { secure: false } // Imposta su `true` se utilizzi HTTPS
+    
 }));
 
 // Middleware setup
