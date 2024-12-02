@@ -9,7 +9,7 @@ const { log } = require('console');
 const utils=require('./utils');
 const apiFront=require('./apiFrontend');
 const apiESP=require('./apiESP');
-const RedisStore = require('connect-redis').default;
+const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 
 const app = express();
