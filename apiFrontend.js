@@ -374,10 +374,10 @@ async function stats(req, res) {
         const daily = await new Promise((resolve, reject) => {
             utils.db.all(
                 `SELECT COUNT(*) AS count, DATE(consumption_time, 'localtime') AS date
-                 FROM coffee_consumptions
-                 GROUP BY DATE(consumption_time, 'localtime')
-                 ORDER BY date ASC
-                 LIMIT 7;`, 
+                FROM coffee_consumptions 
+                WHERE consumption_time >= date('now', '-7 days')
+                GROUP BY DATE(consumption_time, 'localtime') 
+                ORDER BY date ASC;`, 
                 (err, rows) => {
                     if (err) return reject(err);
                     resolve(rows);
@@ -390,11 +390,12 @@ async function stats(req, res) {
             utils.db.all(
                 `SELECT 
                     strftime('%Y-%W', consumption_time, 'localtime') AS week,
+                    DATE(consumption_time, 'weekday 0', '-6 days', 'localtime') AS week_start,
                     COUNT(*) AS total
-                 FROM coffee_consumptions
-                 GROUP BY week
-                 ORDER BY week ASC
-                 LIMIT 4;`, 
+                FROM coffee_consumptions
+                WHERE consumption_time >= date('now', '-28 days')
+                GROUP BY week
+                ORDER BY week ASC;`, 
                 (err, rows) => {
                     if (err) return reject(err);
                     resolve(rows);
@@ -405,7 +406,11 @@ async function stats(req, res) {
         // Risposta JSON
         res.json({
             daily: daily.map(row => ({ date: row.date, count: row.count })),
-            weekly: weekly.map(row => ({ week: row.week, total: row.total }))
+            weekly: weekly.map(row => ({ 
+                week: row.week, 
+                week_start: row.week_start,  // Aggiungi questo campo
+                total: row.total 
+            }))
         });
     } catch (error) {
         utils.logEvent('Errore nel recupero delle statistiche:', { error: error.message });

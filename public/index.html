@@ -120,16 +120,36 @@
     <script>
         async function fetchCoffeeStats() {
             try {
-                // Ottieni le statistiche dal server
                 const response = await fetch('/api/stats');
                 const stats = await response.json();
         
                 // Prepara i dati per il grafico giornaliero
-                const dailyLabels = stats.daily.map((entry) => entry.date);
+                const dailyLabels = stats.daily.map((entry) => {
+                    const date = new Date(entry.date);
+                    // Formatta come DD-MM-YYYY
+                    return date.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }).replace(/\//g, '-');
+                });
                 const dailyData = stats.daily.map((entry) => entry.count);
         
                 // Prepara i dati per il grafico settimanale
-                const weeklyLabels = stats.weekly.map((entry) => entry.week);
+                const weeklyLabels = stats.weekly.map((entry) => {
+                    const startDate = new Date(entry.week_start); // Assumendo che la query SQL restituisca week_start
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6);
+                    
+                    // Formatta come "dal DD-MM al DD-MM"
+                    return `dal ${startDate.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit'
+                    }).replace(/\//g, '-')} al ${endDate.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit'
+                    }).replace(/\//g, '-')}`;
+                });
                 const weeklyData = stats.weekly.map((entry) => entry.total);
         
                 // Genera il grafico giornaliero
@@ -148,12 +168,15 @@
                     },
                     options: {
                         scales: {
-                            y: { beginAtZero: true },
+                            y: { 
+                                beginAtZero: true,
+                                max: 15
+                            },
                         },
                     },
                 });
         
-                // Genera il grafico settimanale
+                // Genera il grafico settimanale 
                 const weeklyCtx = document.getElementById('weeklyCoffeeChart').getContext('2d');
                 new Chart(weeklyCtx, {
                     type: 'line',
@@ -169,7 +192,10 @@
                     },
                     options: {
                         scales: {
-                            y: { beginAtZero: true },
+                            y: { 
+                                beginAtZero: true,
+                                max: 35
+                            },
                         },
                     },
                 });
