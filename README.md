@@ -253,7 +253,7 @@ CREATE TABLE tags (
 Questo progetto è rilasciato sotto [Licenza MIT](LICENSE)  - usalo come vuoi, ma offri un caffè a chi lo ha creato! 😉
 
 ## Collaboratori
- - Andrea Iannoli - https://github.com/AndreaIannoli/PollDB
+ - Andrea Iannoli - https://github.com/AndreaIannoli
  - Mario Sabatini - https://github.com/MarioSabatini
 
 
