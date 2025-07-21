@@ -13,18 +13,16 @@ WiFiClientSecure client;
 
 
 // Pin configurazione
-const int COFFEE_RELAY_PIN = 15;    // Relè caffè (invariato)
-const int PRESENCE_RELAY_PIN = 2;  // Nuovo relè presenza
+const int COFFEE_RELAY_PIN = 15;    // Relè erogazione caffè 
+const int PRESENCE_RELAY_PIN = 2;  // Relè corrente generale
 const int RDM6300_RX_PIN = 22;
 const int RDM6300_TX_PIN = 21;
 const int SWITCH_PIN = 32;
 
-// Pin LED RGB
 const int LED_RED_PIN = 23;
 const int LED_GREEN_PIN = 22;
 const int LED_BLUE_PIN = 21;
 
-// Stati del sistema
 bool userAuthorized = false;
 String currentAuthorizedTag = "";
 int currentCoffeeCount = 0;
@@ -35,7 +33,7 @@ int ledBlinkingCounter = 0;
 unsigned long lastReadTime = 0;
 unsigned long presenceStartTime = 0;
 const unsigned long COOLDOWN_PERIOD = 5000;
-const unsigned long PRESENCE_TIMEOUT = 300000; // 5 minuti in millisecondi
+const unsigned long PRESENCE_TIMEOUT = 300000; // 5 minuti 
 
 // Variabile per lo stato dello switch
 int lastSwitchState = HIGH;
@@ -47,12 +45,9 @@ bool blinkState = false;
 bool isBlinking = false;
 
 IPAddress local_IP(130, 136, 201, 139);
-// Set your Gateway IP address
 IPAddress gateway(130, 136, 201, 190);
-
 IPAddress subnet(255, 255, 255, 192);
-IPAddress primaryDNS(1, 1, 1, 1);   //optional
-
+IPAddress primaryDNS(1, 1, 1, 1);
 SoftwareSerial rfidSerial(RDM6300_RX_PIN, RDM6300_TX_PIN);
 
 String tagID = "";
@@ -74,11 +69,8 @@ void setup() {
   
   pinMode(SWITCH_PIN, INPUT_PULLUP);
   
-  // Inizializza LED rosso (nessuno autenticato)
-  setLEDColor(true, false, false);
-  
 
-   // Configures static IP address
+  setLEDColor(true, false, false);
   if (!WiFi.config(local_IP, gateway, subnet, primaryDNS)) {
     Serial.println("STA Failed to configure");
   }
