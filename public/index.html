@@ -31,7 +31,6 @@
     </header>
 
     <main class="flex-grow container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        <!-- Form aggiunta tag -->
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-4 sm:mb-8">
             <div class="flex gap-10">
                 <div class="w-3/5">
@@ -58,8 +57,6 @@
                     <div id="notifications" class="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md w-full h-full">
                         <h2 class="text-lg sm:text-xl font-semibold mb-4">Notifiche</h2>
                         <ul class="space-y-2" id="notificationsList">
-                            <!-- Notifiche dinamiche -->
-                            <!-- Esempio: <li class="text-sm text-gray-700">Nuovo tag aggiunto!</li> -->
                         </ul>
                     </div>
                 </div>
@@ -106,7 +103,6 @@
                         </tr>
                     </thead>
                     <tbody id="tagsList" class="bg-white divide-y divide-gray-200">
-                        <!-- I tag verranno inseriti qui dinamicamente -->
                     </tbody>
                 </table>
             </div>
@@ -114,7 +110,6 @@
     </main>
 
     <tbody id="tagsList" class="bg-white divide-y divide-gray-200">
-        <!-- I tag verranno inseriti qui dinamicamente -->
     </tbody>
 
     <script>
@@ -126,7 +121,6 @@
                 // Prepara i dati per il grafico giornaliero
                 const dailyLabels = stats.daily.map((entry) => {
                     const date = new Date(entry.date);
-                    // Formatta come DD-MM-YYYY
                     return date.toLocaleDateString('it-IT', {
                         day: '2-digit',
                         month: '2-digit',
@@ -137,11 +131,10 @@
         
                 // Prepara i dati per il grafico settimanale
                 const weeklyLabels = stats.weekly.map((entry) => {
-                    const startDate = new Date(entry.week_start); // Assumendo che la query SQL restituisca week_start
+                    const startDate = new Date(entry.week_start); 
                     const endDate = new Date(startDate);
                     endDate.setDate(startDate.getDate() + 6);
-                    
-                    // Formatta come "dal DD-MM al DD-MM"
+
                     return `dal ${startDate.toLocaleDateString('it-IT', {
                         day: '2-digit',
                         month: '2-digit'
@@ -210,10 +203,9 @@
             try {
                 const response = await fetch('/api/tags');
                 const data = await response.json();
-                const tags = data.tag;  // I tag sono contenuti in `data.tags`
-                const timestamp = data.timestamp;  // Il timestamp è nel campo `timestamp`
+                const tags = data.tag; 
+                const timestamp = data.timestamp;  
         
-                // Aggiorna il label con il timestamp
                 const timestampLabel = document.getElementById('timestampLabel');
                 if (timestampLabel) {
                     timestampLabel.textContent = `Ultimo aggiornamento: ${new Date(timestamp).toLocaleDateString()}`;
@@ -378,7 +370,7 @@
             const syncTagOverlay = document.getElementById('syncTagOverlay');
             syncTagOverlay.classList.remove('hidden');
         
-            let pollingInterval; // Dichiarato qui per essere accessibile da timeout e pulsante "X"
+            let pollingInterval; 
             
             // Timeout di 30 secondi per interrompere la funzione
             const timeout = setTimeout(() => {
@@ -415,11 +407,9 @@
                         }
                     }, 2000);
                 });
-        
-            // Pulsante "X" per interrompere manualmente la funzione
             document.getElementById('closeOverlayButton').onclick = () => {
                 clearInterval(pollingInterval);
-                clearTimeout(timeout); // Cancella il timeout se chiuso manualmente
+                clearTimeout(timeout);
                 syncTagOverlay.classList.add('hidden');
             };
         }

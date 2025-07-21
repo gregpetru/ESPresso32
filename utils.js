@@ -1,4 +1,4 @@
-const pathReset = 'file/timestamp.json';  // Definisci il percorso del file
+const pathReset = 'file/timestamp.json';  
 const path = require('path');
 require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
@@ -18,9 +18,9 @@ function requireAdmin(req, res, next) {
 
 
 function allowOnlyFromEsp32(req, res, next) {
-    const esp32Ip = process.env.IpESP; // Replace with the actual IP of your ESP32
+    const esp32Ip = process.env.IpESP; 
     logEvent('l ip è: ',esp32Ip);
-    const clientIp = req.ip.replace('::ffff:', ''); // Remove IPv6 prefix if present
+    const clientIp = req.ip.replace('::ffff:', ''); 
     if (clientIp === esp32Ip) {
         next();
     } else {
@@ -29,7 +29,6 @@ function allowOnlyFromEsp32(req, res, next) {
     }
 }
 
-// Funzione per ottenere il timestamp salvato
 const getTimestamp = () => {
     try {
         const data = fs.readFileSync(pathReset, 'utf8');
@@ -41,7 +40,6 @@ const getTimestamp = () => {
     }
 };
 
-// Funzione per salvare il timestamp
 const saveTimestamp = (timestamp) => {
     const data = { timestamp };
     try {
@@ -55,7 +53,6 @@ function generateMD5(text) {
     return crypto.createHash('md5').update(text).digest('hex');
 }
 
-// Logging configuration remains the same...
 const logDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir);
@@ -157,7 +154,7 @@ function initDatabase() {
             console.error('Errore durante la verifica dell\'utente admin:', err);
         } else if (!row) {
             // Se l'utente admin non esiste, lo creiamo
-            const password = process.env.Password-admin;  // Sostituisci con la password desiderata
+            const password = process.env.Password-admin;  
     
             bcrypt.hash(password, 10, (err, hashedPassword) => {
                 if (err) {

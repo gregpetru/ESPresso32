@@ -1,6 +1,6 @@
 
 const utils= require ('./utils.js');
-// Existing routes remain the same...
+
 function check_rfid(req,res){
     const tagHash = req.query.taghash;
     const tag = req.query.tag;

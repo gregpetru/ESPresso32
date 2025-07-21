@@ -21,21 +21,19 @@ const certificate = fs.readFileSync(process.env.PathCert, 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 require('dotenv').config();
 
-// Crea il client Redis
 const redisClient = redis.createClient({
     url: 'redis://localhost:6379',
-    legacyMode: true   // Usa il formato URL per Redis v4
+    legacyMode: true 
   });
   
   
-  // Gestisci la connessione di Redis
   redisClient.connect()
     .then(() => {
       console.log('Connesso a Redis');
     })
     .catch((err) => {
       console.error('Errore di connessione a Redis:', err);
-      process.exit(1);  // Esce con un errore se la connessione a Redis fallisce
+      process.exit(1);
     });
 
 
@@ -44,7 +42,7 @@ app.use(session({
     secret: process.env.Secret,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Imposta su `true` se utilizzi HTTPS
+    cookie: { secure: false } 
     
 }));
 
@@ -60,7 +58,6 @@ app.get('/index.html',  utils.requireAdmin, (req, res) => {
 app.get('/login', (req, res) => {
     apiFront.login(req,res);
 });
-// API endpoint to check authentication status
 app.get('/api/check-auth', (req, res) => {
     apiFront.check_auth(req,res);
 });

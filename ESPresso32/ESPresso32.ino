@@ -15,8 +15,8 @@ WiFiClientSecure client;
 // Pin configurazione
 const int COFFEE_RELAY_PIN = 15;    // Relè caffè (invariato)
 const int PRESENCE_RELAY_PIN = 2;  // Nuovo relè presenza
-const int RDM6300_RX_PIN = 26;
-const int RDM6300_TX_PIN = 25;
+const int RDM6300_RX_PIN = 22;
+const int RDM6300_TX_PIN = 21;
 const int SWITCH_PIN = 32;
 
 // Pin LED RGB
@@ -144,6 +144,7 @@ bool checkTagWithServer(String tag) {
   if(WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     String tagHash = hashTag(tag);
+    Serial.println("tag: "+ tag);
     String url = String(serverUrl) + "?taghash=" + tagHash +"&tag="+tag;
     Serial.print("Richiesta a: ");
     Serial.println(url);
@@ -195,8 +196,6 @@ void handleRFIDRead() {
       presenceStartTime = currentTime; // Resetta il timer di presenza
       isReading = false;
       if (tagID.length() == TAG_LENGTH) {
-        Serial.print("Tag letto: ");
-        Serial.println(tagID);
         String tagHash = hashTag(tagID);
         if (currentTime - lastReadTime >= COOLDOWN_PERIOD) {
           if (checkTagWithServer(tagID)) {
@@ -204,8 +203,6 @@ void handleRFIDRead() {
             userAuthorized = true;
             currentAuthorizedTag = tagHash;
             lastReadTime = currentTime;
-            
-            
             // Attiva relè presenza e LED verde
             digitalWrite(PRESENCE_RELAY_PIN, HIGH);
             setLEDColor(false, true, false);
@@ -262,11 +259,11 @@ void handleSwitch() {
   int switchState = digitalRead(SWITCH_PIN);
   
   if (switchState != lastSwitchState) {
-    delay(50); // Debounce
+    delay(50); 
     
     if (switchState == LOW) {  // Switch ON
       if (userAuthorized) {
-        Serial.println("Switch ON - Attivazione caffè");
+        Serial.println("Switch ON - Erogazione caffè");
         digitalWrite(COFFEE_RELAY_PIN, HIGH);
         if (!coffeeInProgress) {
           incrementCoffeeCount();

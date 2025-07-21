@@ -174,7 +174,7 @@ function syncTrue(req,res){
 function checksync(req,res){
     if (pendingTagId) {
         const tagId = pendingTagId;
-        pendingTagId = null; // Reset after reading
+        pendingTagId = null; 
 
         res.json({ tagId: tagId });
     } else {
@@ -191,7 +191,6 @@ function sync(req,res){
 
     const cleanTagId = tagId.replace(/[^0-9A-Fa-f]/g, '');
 
-    // Find the session with eventsync=true
     const sessions = req.sessionStore.sessions;
     let found = false;
     for (let sessionId in sessions) {
@@ -403,12 +402,11 @@ async function stats(req, res) {
             );
         });
 
-        // Risposta JSON
         res.json({
             daily: daily.map(row => ({ date: row.date, count: row.count })),
             weekly: weekly.map(row => ({ 
                 week: row.week, 
-                week_start: row.week_start,  // Aggiungi questo campo
+                week_start: row.week_start, 
                 total: row.total 
             }))
         });
